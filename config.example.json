@@ -1,0 +1,11 @@
+{
+    "proxy": "http://server:port",
+    "hashkey": "hash key here",
+    "position": {
+        "latitude": 48.8475038,
+        "longitude": 2.3351958
+    },
+    "api": {
+        "version": 6301
+    }
+}
