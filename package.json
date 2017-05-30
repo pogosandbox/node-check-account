@@ -1,11 +1,7 @@
 {
   "name": "node-check-account",
   "version": "1.0.0",
-  "description": "",
   "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
   "author": "niico",
   "license": "MIT",
   "dependencies": {
@@ -14,14 +10,14 @@
     "lodash": "^4.17.4",
     "moment": "^2.18.1",
     "mz": "^2.6.0",
-    "node-pogo-protos": "^2.10.0",
-    "pogobuf-vnext": "^2.0.3",
+    "node-pogo-protos": "^2.10.3",
+    "pogobuf-vnext": "pogosandbox/pogobuf#dev",
     "winston": "^2.3.1"
   },
   "devDependencies": {
     "@types/node": "^7.0.22",
     "eslint": "^3.19.0",
     "eslint-config-airbnb-base": "^11.2.0",
-    "eslint-plugin-import": "^2.2.0"
+    "eslint-plugin-import": "^2.3.0"
   }
 }

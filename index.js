@@ -51,12 +51,14 @@ async function loadAccount(filename, delimiter = ',') {
     const lines = content.split(/\r?\n/);
     const accounts = [];
     for (const line of lines) {
-        const account = line.split(delimiter);
-        accounts.push({
-            type: account[0],
-            username: account[1],
-            password: account[2],
-        });
+        if (line) {
+            const account = line.split(delimiter);
+            accounts.push({
+                type: account[0],
+                username: account[1],
+                password: account[2],
+            });
+        }
     }
     return accounts;
 }
@@ -170,7 +172,7 @@ async function saveToFile(accounts, filename) {
 
 async function Main() {
     await loadConfig();
-    const accounts = await loadAccount('accounts.4.csv');
+    const accounts = await loadAccount('accounts.5.csv');
     for (const account of accounts) {
         await checkAccount(account);
     }
