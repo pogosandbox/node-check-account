@@ -160,6 +160,7 @@ async function checkAccount(account) {
     }
 
     logger.info(`  acount has ${account.store ? '' : 'not '}access to the store.`);
+    logger.info(`  acount has ${account.iap ? '' : 'not '}access to in app purchases.`);
 }
 
 async function saveToFile(accounts, filename) {
