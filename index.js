@@ -45,7 +45,8 @@ async function loadConfig() {
 }
 
 async function loadAccount(filename, delimiter = ',') {
-    if (!fs.existsSync(filename)) throw new Error('accounts.csv does not exist.');
+    logger.info('Import accounts from ' + filename);
+    if (!fs.existsSync(filename)) throw new Error('input file does not exist.');
 
     const content = await fs.readFile(filename, 'utf8');
     const lines = content.split(/\r?\n/);
@@ -173,7 +174,8 @@ async function saveToFile(accounts, filename) {
 
 async function Main() {
     await loadConfig();
-    const accounts = await loadAccount('accounts.5.csv');
+    const input = process.argv[2] || 'accounts.5.csv';
+    const accounts = await loadAccount(input);
     for (const account of accounts) {
         await checkAccount(account);
     }
