@@ -56,5 +56,6 @@ module.exports = {
         "no-underscore-dangle": [2, {
             "allow": [ "_requestType" ]
         }],
+        "no-console": 0
     }
 };

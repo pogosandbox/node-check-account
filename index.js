@@ -4,26 +4,40 @@ const _ = require('lodash');
 const fs = require('mz/fs');
 const logger = require('winston');
 const moment = require('moment');
+const csvImport = require('neat-csv');
 const pogobuf = require('pogobuf-vnext');
 const POGOProtos = require('node-pogo-protos');
+const winstonCommon = require('winston/lib/winston/common');
 
 const RequestType = POGOProtos.Networking.Requests.RequestType;
 const PlatformRequestType = POGOProtos.Networking.Platform.PlatformRequestType;
 
 let config = {
     api: {
-        version: 6301,
+        version: 6304,
         country: 'FR',
         language: 'fr',
         timezone: 'Europe/Paris',
     },
+    delimiter: ',',
     loglevel: 'debug',
 };
+
 async function loadConfig() {
     if (!fs.existsSync('config.json')) throw new Error('Please create a config.json config file.');
 
     const content = await fs.readFile('config.json', 'utf8');
     config = _.defaultsDeep(JSON.parse(content), config);
+
+    logger.transports.Console.prototype.log = function(level, message, meta, callback) {
+        const output = winstonCommon.log(Object.assign({}, this, {
+            level,
+            message,
+            meta,
+        }));
+        console[level in console ? level : 'log'](output);
+        setImmediate(callback, null, true);
+    };
 
     logger.remove(logger.transports.Console);
     logger.add(logger.transports.Console, {
@@ -44,31 +58,21 @@ async function loadConfig() {
     });
 }
 
-async function loadAccount(filename, delimiter = ',') {
+async function loadAccount(filename) {
     logger.info('Import accounts from ' + filename);
-    if (!fs.existsSync(filename)) throw new Error('input file does not exist.');
+    if (!fs.existsSync(filename)) throw new Error(`Input file does not exist: ${filename}`);
 
     const content = await fs.readFile(filename, 'utf8');
-    const lines = content.split(/\r?\n/);
-    const accounts = [];
-    for (const line of lines) {
-        if (line) {
-            const account = line.split(delimiter);
-            accounts.push({
-                type: account[0],
-                username: account[1],
-                password: account[2],
-            });
-        }
-    }
-    return accounts;
+    return csvImport(content, {
+        separator: config.delimiter,
+    });
 }
 
 async function loginFlow(account, client) {
     client.setPosition({
-        latitude: config.position.latitude,
-        longitude: config.position.longitude,
-        altitude: _.random(-10, 20, true),
+        latitude: account.latitude || config.position.latitude,
+        longitude: account.longitude || config.position.longitude,
+        altitude: _.random(0, 100, true),
     });
 
     await client.init(false);
@@ -131,7 +135,7 @@ async function checkAccount(account) {
 
     const deviceId = _.times(32, () => '0123456789abcdef'[Math.floor(Math.random() * 16)]).join('');
     const client = new pogobuf.Client({
-        deviceId: deviceId,
+        deviceId: account.deviceId || deviceId,
         authType: account.type,
         username: account.username,
         password: account.password,
@@ -150,8 +154,6 @@ async function checkAccount(account) {
         batch.batchAddPlatformRequest(PlatformRequestType.GET_STORE_ITEMS,
                                       new POGOProtos.Networking.Platform.Requests.GetStoreItemsRequest({}));
         const response = await batch.batchCall();
-
-        await fs.writeFile('store.json', JSON.stringify(response, null, 4), 'utf8');
 
         account.store = true;
         account.iap = _.some(response.items, item => item.is_iap);

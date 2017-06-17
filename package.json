@@ -1,6 +1,6 @@
 {
   "name": "node-check-account",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "main": "index.js",
   "author": "niico",
   "license": "MIT",
@@ -10,13 +10,14 @@
     "lodash": "^4.17.4",
     "moment": "^2.18.1",
     "mz": "^2.6.0",
+    "neat-csv": "^2.1.0",
     "node-pogo-protos": "^2.10.3",
-    "pogobuf-vnext": "pogosandbox/pogobuf#dev",
+    "pogobuf-vnext": "^2.1.1",
     "winston": "^2.3.1"
   },
   "devDependencies": {
-    "@types/node": "^7.0.22",
-    "eslint": "^3.19.0",
+    "@types/node": "^7.0.31",
+    "eslint": "^4.0.0",
     "eslint-config-airbnb-base": "^11.2.0",
     "eslint-plugin-import": "^2.3.0"
   }
