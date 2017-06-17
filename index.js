@@ -86,16 +86,13 @@ async function loginFlow(account, client) {
     account.warn = response.warn;
     account.banned = response.banned;
 
-    logger.info(`  acount is ${account.warn ? '' : 'not '}warn`);
-    logger.info(`  acount is ${account.banned ? '' : 'not '}banned`);
-
     batch = client.batchStart();
     batch.downloadRemoteConfigVersion(POGOProtos.Enums.Platform.IOS, '', '', '', +config.api.version)
-         .checkChallenge()
-         .getHatchedEggs()
-         .getInventory(0)
-         .checkAwardedBadges()
-         .downloadSettings('');
+        .checkChallenge()
+        .getHatchedEggs()
+        .getInventory(0)
+        .checkAwardedBadges()
+        .downloadSettings('');
     response = await batch.batchCall();
 
     const inventoryResponse = _.find(response, resp => resp._requestType === RequestType.GET_INVENTORY);
@@ -106,22 +103,22 @@ async function loginFlow(account, client) {
 
     batch = client.batchStart();
     batch.getPlayerProfile('')
-         .checkChallenge()
-         .getHatchedEggs()
-         .getInventory(inventory)
-         .checkAwardedBadges()
-         .downloadSettings(settings)
-         .getBuddyWalked();
+        .checkChallenge()
+        .getHatchedEggs()
+        .getInventory(inventory)
+        .checkAwardedBadges()
+        .downloadSettings(settings)
+        .getBuddyWalked();
     await batch.batchCall();
 
     batch = client.batchStart();
     batch.levelUpRewards(level)
-         .checkChallenge()
-         .getHatchedEggs()
-         .getInventory(inventory)
-         .checkAwardedBadges()
-         .downloadSettings(settings)
-         .getBuddyWalked();
+        .checkChallenge()
+        .getHatchedEggs()
+        .getInventory(inventory)
+        .checkAwardedBadges()
+        .downloadSettings(settings)
+        .getBuddyWalked();
     await batch.batchCall();
 
     return {
@@ -147,12 +144,18 @@ async function checkAccount(account) {
         maxTries: 1,
     });
 
-    await loginFlow(account, client);
+    try {
+        await loginFlow(account, client);
+    } catch (e) {
+        if (e.message.indexOf('Status code 3') >= 0) {
+            account.banned = true;
+        }
+    }
 
     try {
         const batch = client.batchStart();
         batch.batchAddPlatformRequest(PlatformRequestType.GET_STORE_ITEMS,
-                                      new POGOProtos.Networking.Platform.Requests.GetStoreItemsRequest({}));
+            new POGOProtos.Networking.Platform.Requests.GetStoreItemsRequest({}));
         const response = await batch.batchCall();
 
         account.store = true;
@@ -162,6 +165,8 @@ async function checkAccount(account) {
         account.iap = false;
     }
 
+    logger.info(`  acount is ${account.warn ? '' : 'not '}warn`);
+    logger.info(`  acount is ${account.banned ? '' : 'not '}banned`);
     logger.info(`  acount has ${account.store ? '' : 'not '}access to the store.`);
     logger.info(`  acount has ${account.iap ? '' : 'not '}access to in app purchases.`);
 }
@@ -176,7 +181,7 @@ async function saveToFile(accounts, filename) {
 
 async function Main() {
     await loadConfig();
-    const input = process.argv[2] || 'accounts.5.csv';
+    const input = process.argv[2] || 'accounts.csv';
     const accounts = await loadAccount(input);
     for (const account of accounts) {
         await checkAccount(account);
@@ -185,5 +190,5 @@ async function Main() {
 }
 
 Main()
-.then(() => logger.info('Done'))
-.catch(e => logger.error(e));
+    .then(() => logger.info('Done'))
+    .catch(e => logger.error(e));
