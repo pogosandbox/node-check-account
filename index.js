@@ -14,13 +14,13 @@ const PlatformRequestType = POGOProtos.Networking.Platform.PlatformRequestType;
 
 let config = {
     api: {
-        version: 6304,
+        version: 6702,
         country: 'FR',
         language: 'fr',
         timezone: 'Europe/Paris',
     },
     delimiter: ',',
-    loglevel: 'debug',
+    loglevel: 'info',
 };
 
 async function loadConfig() {
@@ -72,7 +72,7 @@ async function loginFlow(account, client) {
     client.setPosition({
         latitude: account.latitude || config.position.latitude,
         longitude: account.longitude || config.position.longitude,
-        altitude: _.random(0, 100, true),
+        altitude: _.random(0, 50, true),
     });
 
     await client.init(false);
@@ -149,6 +149,8 @@ async function checkAccount(account) {
     } catch (e) {
         if (e.message.indexOf('Status code 3') >= 0) {
             account.banned = true;
+        } else {
+            throw e;
         }
     }
 
@@ -172,9 +174,10 @@ async function checkAccount(account) {
 }
 
 async function saveToFile(accounts, filename) {
-    let content = 'username,banned,warn,store,iap\n';
+    const del = config.delimiter;
+    let content = `username${del}banned${del}warn${del}store${del}iap\n`;
     for (const account of accounts) {
-        content += `${account.username},${account.banned},${account.warn},${account.store},${account.iap}\n`;
+        content += `${account.username}${del}${account.banned}${del}${account.warn}${del}${account.store}${del}${account.iap}\n`;
     }
     await fs.writeFile(filename, content, 'utf8');
 }
